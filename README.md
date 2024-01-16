@@ -1,6 +1,6 @@
 ## Profiling Clang
 
-The following code was used in the tests:
+The following [code](./test.cpp) was used in the tests:
 
 
 ```cpp
@@ -284,7 +284,7 @@ According to the author of [this post](https://aras-p.info/blog/2019/01/12/Inves
 
 This option generates a JSON file that can be visualized in Chrome (using `chrome://tracing`) in a flame chart style, where the horizontal axis represents the time and the vertical axis represents the nested “callstacks”.
 
-**Example 1 (“whole compilation”):**
+**Example:**
 
 
 ```bash
@@ -292,4 +292,21 @@ $ sudo ~/lldb/LLDB/bin/clang++ -ftime-trace test.cpp
 ```
 
 
-**Output:**
+**Output** (for a better view, use `chrome://tracing` and open [this file](./a-test.json)):
+![image](https://github.com/junior-jl/profiling-clang/assets/69206952/8f411a63-d230-4784-92f1-187b5cd23051)
+
+- If you select a block and press <kbd>m</kbd>, the block is marked, showing the execution time for it. For example, the biggest "Source" block shows 6.171 seconds as the execution time for it.
+
+![image](https://github.com/junior-jl/profiling-clang/assets/69206952/b72a5e3b-4f44-4281-be94-ec4414700e0d)
+
+- In the bottom left corner, you can check details of what is that "Source". Here, we have the information that `iostream` include is taking a lot of time.
+
+![image](https://github.com/junior-jl/profiling-clang/assets/69206952/07e99a1a-09ea-4cd7-9379-87ada96dbc44)
+
+- If you click the magnifying glass icon next to 'Title', it will search for occurrences of that title. That is quite useless when you click on something like 'Source', but it can be useful if you click on 'ExecuteCompiler', for example, because you can check where that process is called.
+
+![image](https://github.com/junior-jl/profiling-clang/assets/69206952/f85cecc6-eb4a-405b-bcc7-5e522957277c)
+
+- You can also use <kbd>/</kbd> to search some keyword like `manipulateArray`. You'll notice that there are 6 occurrences (2 for CodeGen Function, 2 for `ParseFunctionDefinition` and 2 for OptFunction with their mangled names for `int` and `double`). Again, as an example, we can see in which files Clang calls `ParseFunctionDefinition` and investigate.
+
+![image](https://github.com/junior-jl/profiling-clang/assets/69206952/fbd85c61-c12a-44a7-a7db-cfb49fbb22f3)
