@@ -59,7 +59,16 @@ void manipulateArray(double arr[], int size) {
 }
 ```
 
+## Comparison between tools
 
+The following times were obtained through `time`.
+
+| **Profiler Tool** | **Total Time** | **Additional Time** | **Additional Time (%)** |
+|:-----------------:|:--------------:|:-------------------:|:-----------------------:|
+| -                 | 6.950s         | 0s                  | 0                       |
+| -ftime-report     | 7.009s         | 59ms                | 0.84                    |
+| -ftime-trace      | 7.101s         | 151ms               | 2.17                    |
+| perf record       | 8.354s         | 1404ms              | 20.21                   |
 
 ### Clang option -ftime-report
 
@@ -310,3 +319,24 @@ $ sudo ~/lldb/LLDB/bin/clang++ -ftime-trace test.cpp
 - You can also use <kbd>/</kbd> to search some keyword like `manipulateArray`. You'll notice that there are 6 occurrences (2 for CodeGen Function, 2 for `ParseFunctionDefinition` and 2 for OptFunction with their mangled names for `int` and `double`). Again, as an example, we can see in which files Clang calls `ParseFunctionDefinition` and investigate.
 
 ![image](https://github.com/junior-jl/profiling-clang/assets/69206952/fbd85c61-c12a-44a7-a7db-cfb49fbb22f3)
+
+### perf
+
+Perf is a profiler tool for Linux based systems. Let's use `perf record` to save the profile data into `perf.data` and `perf report` to display the data. We'll use `-g` option to enable the callstacks.
+
+**Example:**
+
+```bash
+sudo perf record -g ~/lldb/LLDB/bin/clang++ test.cpp
+sudo perf report
+```
+
+**Output:**
+
+![image](https://github.com/junior-jl/profiling-clang/assets/69206952/cfb6b24f-4236-4508-92cf-6e077bb2f351)
+
+In perf output, `Children` means the percentage of time spent in the functions called by that symbol, whereas `Self` represents the time taken by the function itself. Hence, when searching for bottlenecks, `Self` time is more important to look.
+
+- Pressing <kbd>Enter</kbd> on any symbol, a menu is shown, where you can check the Assembly implementation of the symbol (Annotate) and a few other options.
+- Pressing <kbd>+</kbd> on a symbol, you can see the callstack (the `-g` flag is necessary in `perf report` to enable this feature).
+- Pressing <kbd>E</kbd>, all the callstacks are expanded.
